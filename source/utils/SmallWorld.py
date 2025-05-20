@@ -2,7 +2,19 @@ import numpy as np
 import graph_tool.all as gt
 from random import sample
 
+class SmallWorldDictKeys:
+    CLUSTERING_COEFFICIENT = 'clustering_coefficient'
+    EDGE_NUM = 'edge_num'
+    VERTICE_NUM = 'vertice_num'
+    L_AVG_ESTIMATED = 'l_avg_estimated'
+    L_MEANS_STD = 'l_means_std'
+    CLUSTERING_COEFFICIENT_RANDOM = 'clustering_coefficient_random'
+    CLUSTERING_COEFFICIENT_NORMALIZED = 'clustering_coefficient_normalized'
+    L_EXPECTED_RANDOM = 'l_expected_random'
+    L_NORMALIZED = 'l_normalized'
+    SMALL_WORLD_COEFFICIENT = 'small_world_coefficient'
 
+    
 class SmallWorldResult:
     def __init__(
         self,
@@ -55,6 +67,20 @@ class SmallWorldResult:
             return self.clustering_coefficient_normalized / self.l_normalized
         except:
             return np.nan
+        
+    def to_dict(self):
+        return {
+            SmallWorldDictKeys.CLUSTERING_COEFFICIENT : self.clustering_coefficient,
+            SmallWorldDictKeys.EDGE_NUM : self.edge_num,
+            SmallWorldDictKeys.VERTICE_NUM : self.vertice_num,
+            SmallWorldDictKeys.L_AVG_ESTIMATED : self.l_avg_estimated,
+            SmallWorldDictKeys.L_MEANS_STD : self.l_means_std,
+            SmallWorldDictKeys.CLUSTERING_COEFFICIENT_RANDOM : self.clustering_coefficient_random,
+            SmallWorldDictKeys.CLUSTERING_COEFFICIENT_NORMALIZED : self.clustering_coefficient_normalized,
+            SmallWorldDictKeys.L_EXPECTED_RANDOM : self.l_expected_random,
+            SmallWorldDictKeys.L_NORMALIZED : self.l_normalized,
+            SmallWorldDictKeys.SMALL_WORLD_COEFFICIENT : self.small_world_coefficient
+        }
 
 
     # Small world result builder function
