@@ -27,7 +27,7 @@ dependencies:
   # Graphing & Networks
   - networkx=3.3
   - leidenalg=0.10.2
-  - igraph=0.11.4
+  - python-igraph=0.11.4
   
   # Plotting
   - matplotlib=3.8.0
