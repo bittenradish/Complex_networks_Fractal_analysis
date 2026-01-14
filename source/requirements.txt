@@ -20,3 +20,4 @@ torch==2.3.1
 wordcloud==1.9.3
 regex==2024.5.15
 zstandard==0.23.0
+igraph==0.11.4
