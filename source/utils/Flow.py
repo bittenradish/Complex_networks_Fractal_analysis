@@ -1,6 +1,8 @@
 import graph_tool.all as gt
 import numpy as np
 
+__all__ = ['is_weight_type_supported', 'has_parallel_edges', 'simplify_graph_with_weights']
+
 def is_weight_type_supported(type):
     supported_types = ['int16_t', 'int32_t', 'int64_t', 'float', 'double', 'long double']
     return type in supported_types
