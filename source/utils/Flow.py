@@ -1,7 +1,26 @@
 import graph_tool.all as gt
 import numpy as np
 
-__all__ = ['is_weight_type_supported', 'has_parallel_edges', 'simplify_graph_with_weights']
+__all__ = ['analysis_folder', 
+           'is_weight_type_supported', 
+           'has_parallel_edges', 
+           'simplify_graph_with_weights', 
+           'prepare_folder'
+           ]
+
+# Flow Variables
+
+analysis_folder = "./analysis_data/"
+
+# Flow functions
+
+def prepare_folder(graph_name):
+    safe_graph_name = graph_name.replace('/', '__')
+    path = f"{analysis_folder}{safe_graph_name}"
+    if not os.path.exists(path):
+        os.makedirs(path)
+    return path
+
 
 def is_weight_type_supported(type):
     supported_types = ['int16_t', 'int32_t', 'int64_t', 'float', 'double', 'long double']
@@ -58,3 +77,24 @@ def simplify_graph_with_weights(graph: gt.Graph, weight_name = None, inplace: bo
         processed_weight_map = summed_map
 
     return g, processed_weight_map
+
+
+def directed_to_undirected_sum_weights(
+    g_directed: gt.Graph, 
+    existing_weight_name = None,
+    inplace: bool = False
+) -> tuple[gt.Graph, gt.EdgePropertyMap]:
+    if not g_directed.is_directed():
+        raise ValueError("Input graph must be directed.")
+
+    if inplace:
+        g_undirected = g_directed
+        g_undirected.set_directed(False)
+    else:
+        g_undirected = gt.Graph(g_directed, directed=False)
+
+    graph_result, result_map = simplify_graph_with_weights(g_undirected, weight_name=existing_weight_name, inplace=True)
+    
+    return graph_result, result_map
+
+
