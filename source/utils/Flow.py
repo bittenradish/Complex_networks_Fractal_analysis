@@ -6,7 +6,8 @@ __all__ = ['analysis_folder',
            'is_weight_type_supported', 
            'has_parallel_edges', 
            'simplify_graph_with_weights', 
-           'prepare_folder'
+           'prepare_folder',
+           'directed_to_undirected_sum_weights'
            ]
 
 # Flow Variables
