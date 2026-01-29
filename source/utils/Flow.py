@@ -1,5 +1,6 @@
 import graph_tool.all as gt
 import numpy as np
+import os
 
 __all__ = ['analysis_folder', 
            'is_weight_type_supported', 
