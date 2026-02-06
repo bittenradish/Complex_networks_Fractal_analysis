@@ -1,10 +1,14 @@
 import graph_tool.all as gt
 import numpy as np
+import pandas as pd
 import os
 import json
 import glob
 import subprocess
 import shlex
+import multiprocessing
+import logging
+from typing import Callable
 
 __all__ = ['analysis_folder', 
            'is_weight_type_supported', 
@@ -16,7 +20,12 @@ __all__ = ['analysis_folder',
            'get_latest_output_json',
            'save_json',
            'run_box_covering',
-           'start_box_covering_pipeline'
+           'start_box_covering_pipeline',
+           'in_separate_process',
+           'config_logging',
+           'calculate_assortativity',
+           'create_series',
+           'create_nan_series'
            ]
 
 # Flow Variables
@@ -24,6 +33,39 @@ __all__ = ['analysis_folder',
 analysis_folder = "./analysis_data/"
 
 # Flow functions
+
+## General functions
+
+def config_logging(into: str):
+    logging.basicConfig(
+        filename=into,
+        level=logging.INFO,
+        format='%(asctime)s - %(levelname)s - %(message)s',
+        force=True
+    )
+
+def in_separate_process(run: Callable, withArgs: tuple, log_as: str = ''):
+    func_name = run.__name__
+    process_identifier = f"{func_name} | Log ID: {log_as if log_as else str(withArgs)}"
+
+    print(f"--- Processing: {process_identifier} ---")
+    logging.info(f"START: {process_identifier}")
+
+    # Create a separate process
+    p = multiprocessing.Process(target=run, args=withArgs)
+    
+    p.start()
+    p.join()
+
+    # Check exit code
+    if p.exitcode != 0:
+        error_msg = f"FAILED: {process_identifier} - Process terminated with exit code: {p.exitcode}"
+        print(f"!!! {error_msg}")
+        logging.error(error_msg)
+    else:
+        success_msg = f"SUCCESS: {process_identifier}"
+        print(success_msg)
+        logging.info(success_msg)
 
 ## Box covering pipeline functions
 
@@ -79,6 +121,63 @@ def start_box_covering_pipeline(graph, folder_path, is_mst):
 
     json = get_latest_output_json()
     save_json(f"{folder_path}/box_{suffix}_result.json", json)
+
+
+## Metrics functions
+
+def calculate_assortativity(graph, degree_property):
+    assortativity_undirected, variance_undirected = gt.assortativity(graph, deg=degree_property)
+    return assortativity_undirected, variance_undirected
+
+
+def create_series(
+        graph_name,
+        is_mst,
+        modularity_score,
+        small_world_result,
+        hcs_std,
+        hcs_mean,
+        assortativity_undirected,
+        variance_undirected,
+        fit_pl,
+        fit_exp,
+        wmse_pl,
+        wmse_exp,
+        pl_ex_ratio
+):
+    return pd.Series({
+        'name': graph_name,
+        'is_mst': is_mst,
+        'modularity': modularity_score,
+        'small_world': small_world_result.to_dict() if small_world_result is not np.nan else np.nan,
+        'hcs_std': hcs_std,
+        'hcs_mean': hcs_mean,
+        'assortativity': assortativity_undirected,
+        'variance': variance_undirected,
+        'fit_pl': fit_pl,
+        'fit_exp': fit_exp,
+        'wmse_pl': wmse_pl,
+        'wmse_exp': wmse_exp,
+        'pl_ex_ratio': pl_ex_ratio
+    })
+
+
+def create_nan_series(graph_name, is_mst):
+    return create_series(
+        graph_name=graph_name,
+        is_mst=is_mst,
+        modularity_score=np.nan,
+        small_world_result=np.nan,
+        hcs_std=np.nan,
+        hcs_mean=np.nan,
+        assortativity_undirected=np.nan,
+        variance_undirected=np.nan,
+        fit_pl=np.nan,
+        fit_exp=np.nan,
+        wmse_pl=np.nan,
+        wmse_exp=np.nan,
+        pl_ex_ratio=np.nan
+    )
 
 
 ## Graph preparation functions
