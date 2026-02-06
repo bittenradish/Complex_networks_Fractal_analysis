@@ -1,11 +1,17 @@
 import graph_tool.all as gt
+import igraph as ig
+import leidenalg
+
 import numpy as np
 import pandas as pd
+
 import os
 import json
 import glob
+
 import subprocess
 import shlex
+
 import multiprocessing
 import logging
 from typing import Callable
@@ -25,7 +31,8 @@ __all__ = ['analysis_folder',
            'config_logging',
            'calculate_assortativity',
            'create_series',
-           'create_nan_series'
+           'create_nan_series',
+           'modularity_leiden_alg'
            ]
 
 # Flow Variables
@@ -178,6 +185,49 @@ def create_nan_series(graph_name, is_mst):
         wmse_exp=np.nan,
         pl_ex_ratio=np.nan
     )
+
+def modularity_leiden_alg(graph: gt.Graph, weight_key, is_mst, inplace: bool = False):
+    if(inplace):
+        copy_graph = graph
+    else:
+        copy_graph = graph.copy()
+
+    if(weight_key and is_mst):
+        copy_graph.ep[weight_key].a *= -1
+    elif(not weight_key and is_mst):
+        msg = f'Warning: For this graph stated MST={is_mst} and weight was not provided: [{weight_key}]'
+        print(msg)
+        logging.warning(msg)
+
+
+    ig_graph = ig.Graph.from_graph_tool(copy_graph)
+    
+    if ig_graph.vcount() == 0:
+        msg = "Error: Either graph does not have vertices or parsing to IGraph went wrong"
+        print(msg)
+        logging.error(msg)
+        return None
+
+    partition = None
+    try:
+        if(weight_key):
+            partition = leidenalg.find_partition(ig_graph, leidenalg.ModularityVertexPartition, weights=weight_key)
+        else:
+            partition = leidenalg.find_partition(ig_graph, leidenalg.ModularityVertexPartition)
+    except BaseException as e:
+        msg = f"Error during Leiden alg: {e}"
+        print(msg)
+        logging.error(msg)
+        return None
+
+    if partition is None or not hasattr(partition, 'membership') or not partition.membership:
+        msg = "Leiden algorithm did not return a valid partition"
+        print(msg)
+        logging.error(msg)
+        return None
+        
+    
+    return partition.quality()
 
 
 ## Graph preparation functions
