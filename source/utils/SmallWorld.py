@@ -101,8 +101,9 @@ class SmallWorldResult:
                 l_mean_std = np.nan
             else:
                 l_mean_arr = []
-                for i in range(iterations):
-                    vertices = sample(list(g.vertices()), 2 * num_dist)
+                all_vertices_list = list(g.vertices())
+                for _ in range(iterations):
+                    vertices = sample(all_vertices_list, 2 * num_dist)
 
                     # Calculate shortest distance[]
                     distance_arr = [gt.shortest_distance(
