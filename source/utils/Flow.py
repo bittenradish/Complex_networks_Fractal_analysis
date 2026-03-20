@@ -29,6 +29,7 @@ __all__ = ['analysis_folder',
            'start_box_covering_pipeline',
            'in_separate_process',
            'config_logging',
+           'get_network_file_path',
            'calculate_assortativity',
            'create_series',
            'create_nan_series',
@@ -42,6 +43,14 @@ analysis_folder = "./analysis_data/"
 # Flow functions
 
 ## General functions
+
+def get_network_file_path(graph_name, path, is_mst):
+    suffix = "mst" if is_mst else "gc"
+
+    safe_name = graph_name.replace('/', '__')
+    file_path = os.path.join(path, f'{safe_name}_{suffix}.gt.gz')
+
+    return file_path
 
 def config_logging(into: str):
     logging.basicConfig(
