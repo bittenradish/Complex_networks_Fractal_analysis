@@ -107,7 +107,11 @@ def save_json(path, json_file):
 
 
 def run_box_covering(**kwargs):
-    
+    """
+        Code responsible to run C++ algorithms
+        provided by Pouria Mirelmi
+        Source: https://github.com/daarvag95/fractality/
+    """
     # Default arguments of the method:
     default_args = {'type': 'gen', 'graph': "flower 1000 1 2", 'method': 'sketch', 'alpha': '1', 'least_coverage': '1',
            'sketch_k': '128', 'multipass': '10000', 'rad_min': '1', 'rad_max': '30', 'random_seed': '114514'}
